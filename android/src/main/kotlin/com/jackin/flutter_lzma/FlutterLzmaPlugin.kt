@@ -6,11 +6,13 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /** FlutterLzmaPlugin */
 class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
-    /// The MethodChannel that will handle communication between Flutter and native Android
     private lateinit var channel: MethodChannel
+    private val executor: ExecutorService = Executors.newCachedThreadPool()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_lzma")
@@ -23,13 +25,13 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "compress" -> {
-                handleCompress(call, result)
+                executor.execute { handleCompress(call, result) }
             }
             "compressDir" -> {
-                handleCompressDir(call, result)
+                executor.execute { handleCompressDir(call, result) }
             }
             "extract" -> {
-                handleExtract(call, result)
+                executor.execute { handleExtract(call, result) }
             }
             else -> {
                 result.notImplemented()
@@ -39,6 +41,7 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        executor.shutdown()
     }
 
     private fun handleCompress(call: MethodCall, result: Result) {
