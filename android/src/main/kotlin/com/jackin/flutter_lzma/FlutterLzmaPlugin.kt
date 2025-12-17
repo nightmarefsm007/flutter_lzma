@@ -9,10 +9,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 /** FlutterLzmaPlugin */
 class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
+    /// The MethodChannel that will handle communication between Flutter and native Android
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -21,67 +18,22 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        val failed = { code: String, reason: String ->
-            result.error(code, reason, "$code, $reason")
-        }
         when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "compress" -> {
-                val args = call.arguments as Map<*, *>?
-                val filePaths = args?.get("sourceFiles") as? List<*> ?: return failed(
-                    "illegal args",
-                    "source files required"
-                )
-                val destFile = args["destFile"] as? String ?: return failed(
-                    "illegal args",
-                    "dest path required"
-                )
-                if (filePaths.isEmpty()) {
-                    return failed("illegal args", "source files is empty")
-                }
-                if (destFile.isBlank() || destFile.isEmpty()) {
-                    return failed("illegal args", "dest path is empty")
-                }
-                @Suppress("UNCHECKED_CAST")
-                compress(filePaths as List<String>, destFile, result)
+                handleCompress(call, result)
             }
             "compressDir" -> {
-                val args = call.arguments as Map<*, *>?
-                val sourceDir = args?.get("sourceDir") as? String ?: return failed(
-                    "illegal args",
-                    "source dir required"
-                )
-                val destFile = args["destFile"] as? String ?: return failed(
-                    "illegal args",
-                    "dest path required"
-                )
-                if (sourceDir.isBlank() || sourceDir.isEmpty()) {
-                    return failed("illegal args", "source dir is empty")
-                }
-                if (destFile.isBlank() || destFile.isEmpty()) {
-                    return failed("illegal args", "dest path is empty")
-                }
-                compressDir(sourceDir, destFile, result)
+                handleCompressDir(call, result)
             }
             "extract" -> {
-                val args = call.arguments as Map<*, *>?
-                val sourcePath = args?.get("sourceFile") as? String ?: return failed(
-                    "illegal args",
-                    "source file is empty"
-                )
-                val destFile =
-                    args["destDir"] as? String ?: return failed("illegal args", "dest dir is empty")
-                if (sourcePath.isBlank() || sourcePath.isEmpty()) {
-                    return failed("illegal args", "source file is empty")
-                }
-                if (destFile.isBlank() || destFile.isEmpty()) {
-                    return failed("illegal args", "dest path is empty")
-                }
-                extract(sourcePath, destFile, result)
+                handleExtract(call, result)
             }
-            else -> result.notImplemented()
+            else -> {
+                result.notImplemented()
+            }
         }
     }
 
@@ -89,15 +41,78 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 
-    private fun compress(filePaths: List<String>, archivePath: String, result: Result) {
-        result.success(PLzmaNativeApis.instance.compress(filePaths.toTypedArray(), archivePath))
+    private fun handleCompress(call: MethodCall, result: Result) {
+        val args = call.arguments<Map<String, Any>>()
+        
+        val filePaths = args?.get("sourceFiles") as? List<*>
+        if (filePaths.isNullOrEmpty()) {
+            result.error("INVALID_ARGUMENTS", "Source files list is empty or null", null)
+            return
+        }
+
+        val destFile = args["destFile"] as? String
+        if (destFile.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "Destination file path is required", null)
+            return
+        }
+
+        val stringPaths = filePaths.filterIsInstance<String>()
+        if (stringPaths.size != filePaths.size) {
+            result.error("INVALID_ARGUMENTS", "All source file paths must be strings", null)
+            return
+        }
+
+        try {
+            val success = PLzmaNativeApis.instance.compress(stringPaths.toTypedArray(), destFile)
+            result.success(success)
+        } catch (e: Exception) {
+            result.error("COMPRESSION_FAILED", "Failed to compress files: ${e.message}", e.localizedMessage)
+        }
     }
 
-    private fun compressDir(sourcePath: String, archivePath: String, result: Result) {
-        result.success(PLzmaNativeApis.instance.compressDir(sourcePath, archivePath))
+    private fun handleCompressDir(call: MethodCall, result: Result) {
+        val args = call.arguments<Map<String, Any>>()
+        
+        val sourceDir = args?.get("sourceDir") as? String
+        if (sourceDir.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "Source directory path is required", null)
+            return
+        }
+
+        val destFile = args["destFile"] as? String
+        if (destFile.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "Destination file path is required", null)
+            return
+        }
+
+        try {
+            val success = PLzmaNativeApis.instance.compressDir(sourceDir, destFile)
+            result.success(success)
+        } catch (e: Exception) {
+            result.error("COMPRESSION_FAILED", "Failed to compress directory: ${e.message}", e.localizedMessage)
+        }
     }
 
-    private fun extract(archivePath: String, targetPath: String, result: Result) {
-        result.success(PLzmaNativeApis.instance.extract(archivePath, targetPath))
+    private fun handleExtract(call: MethodCall, result: Result) {
+        val args = call.arguments<Map<String, Any>>()
+        
+        val sourceFile = args?.get("sourceFile") as? String
+        if (sourceFile.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "Source file path is required", null)
+            return
+        }
+
+        val destDir = args["destDir"] as? String
+        if (destDir.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "Destination directory path is required", null)
+            return
+        }
+
+        try {
+            val success = PLzmaNativeApis.instance.extract(sourceFile, destDir)
+            result.success(success)
+        } catch (e: Exception) {
+            result.error("EXTRACTION_FAILED", "Failed to extract archive: ${e.message}", e.localizedMessage)
+        }
     }
 }
