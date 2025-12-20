@@ -11,34 +11,36 @@ class MethodChannelFlutterLzma extends FlutterLzmaPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    return version;
+  }
+
+  @override
+  Future<String?> getFfmpegVersion() async {
+    final version =
+        await methodChannel.invokeMethod<String>('getFfmpegVersion');
     return version;
   }
 
   @override
   Future<String?> compress(List<String> files, String destFile) async {
-    final result = await methodChannel.invokeMethod<bool>('compress', <String, dynamic>{
-      "sourceFiles": files,
-      "destFile": destFile
-    });
+    final result = await methodChannel.invokeMethod<bool>('compress',
+        <String, dynamic>{"sourceFiles": files, "destFile": destFile});
     return result == true ? destFile : null;
   }
 
   @override
   Future<String?> compressDir(String sourceDir, String destFile) async {
-    final result = await methodChannel.invokeMethod<bool>('compressDir', <String, dynamic>{
-      "sourceDir": sourceDir,
-      "destFile": destFile
-    });
+    final result = await methodChannel.invokeMethod<bool>('compressDir',
+        <String, dynamic>{"sourceDir": sourceDir, "destFile": destFile});
     return result == true ? destFile : null;
   }
 
   @override
   Future<String?> extract(String sourceFile, String destDir) async {
-    final result = await methodChannel.invokeMethod<bool>('extract', <String, dynamic>{
-      "sourceFile": sourceFile,
-      "destDir": destDir
-    });
+    final result = await methodChannel.invokeMethod<bool>('extract',
+        <String, dynamic>{"sourceFile": sourceFile, "destDir": destDir});
     return result == true ? destDir : null;
   }
 }

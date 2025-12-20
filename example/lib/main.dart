@@ -33,8 +33,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _flutterLzmaPlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _flutterLzmaPlugin.getFfmpegVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -61,9 +61,9 @@ class _MyAppState extends State<MyApp> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Running on: $_platformVersion\n'),
-              buildCompress(),
-              buildCompressDir(),
-              buildExtract(),
+              // buildCompress(),
+              // buildCompressDir(),
+              // buildExtract(),
             ],
           ),
         ),
@@ -72,14 +72,20 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget buildCompress() {
-    return TextButton(onPressed: () => FileCompress().testCompress(), child: const Text("Test Compress"));
+    return TextButton(
+        onPressed: () => FileCompress().testCompress(),
+        child: const Text("Test Compress"));
   }
 
   Widget buildCompressDir() {
-    return TextButton(onPressed: () => FileCompress().testCompressDir(), child: const Text("Test Compress Dir"));
+    return TextButton(
+        onPressed: () => FileCompress().testCompressDir(),
+        child: const Text("Test Compress Dir"));
   }
 
   Widget buildExtract() {
-    return TextButton(onPressed: () => FileExtract().testExtract(), child: const Text("Test Extract"));
+    return TextButton(
+        onPressed: () => FileExtract().testExtract(),
+        child: const Text("Test Extract"));
   }
 }
