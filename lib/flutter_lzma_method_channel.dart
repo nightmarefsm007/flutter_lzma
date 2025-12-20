@@ -17,13 +17,6 @@ class MethodChannelFlutterLzma extends FlutterLzmaPlatform {
   }
 
   @override
-  Future<String?> getFfmpegVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getFfmpegVersion');
-    return version;
-  }
-
-  @override
   Future<String?> compress(List<String> files, String destFile) async {
     final result = await methodChannel.invokeMethod<bool>('compress',
         <String, dynamic>{"sourceFiles": files, "destFile": destFile});

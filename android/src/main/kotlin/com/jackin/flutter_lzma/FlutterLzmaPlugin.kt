@@ -24,9 +24,6 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
-            "getFfmpegVersion" -> {
-                executor.execute { handleFfmpegVersion(call, result) }
-            }
             "compress" -> {
                 executor.execute { handleCompress(call, result) }
             }
@@ -45,15 +42,6 @@ class FlutterLzmaPlugin : FlutterPlugin, MethodCallHandler {
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         executor.shutdown()
-    }
-
-    private fun handleFfmpegVersion(call: MethodCall, result: Result) {
-        try {
-            val version = PLzmaNativeApis.instance.getFfmpegVersion()
-            result.success(version)
-        } catch (e: Exception) {
-            result.error("FFMPEG_VERSION_FAILED", "Failed to get FFmpeg version: ${e.message}", e.localizedMessage)
-        }
     }
 
     private fun handleCompress(call: MethodCall, result: Result) {

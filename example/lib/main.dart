@@ -3,8 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_lzma/flutter_lzma.dart';
-import 'package:flutter_lzma_example/file_compress.dart';
-import 'package:flutter_lzma_example/file_extract.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +31,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion = await _flutterLzmaPlugin.getFfmpegVersion() ??
+      platformVersion =
+          await _flutterLzmaPlugin.getPlatformVersion() ??
           'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
@@ -53,39 +52,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Running on: $_platformVersion\n'),
-              // buildCompress(),
-              // buildCompressDir(),
-              // buildExtract(),
-            ],
-          ),
-        ),
+        appBar: AppBar(title: const Text('Plugin example app')),
+        body: Center(child: Text('Running on: $_platformVersion\n')),
       ),
     );
-  }
-
-  Widget buildCompress() {
-    return TextButton(
-        onPressed: () => FileCompress().testCompress(),
-        child: const Text("Test Compress"));
-  }
-
-  Widget buildCompressDir() {
-    return TextButton(
-        onPressed: () => FileCompress().testCompressDir(),
-        child: const Text("Test Compress Dir"));
-  }
-
-  Widget buildExtract() {
-    return TextButton(
-        onPressed: () => FileExtract().testExtract(),
-        child: const Text("Test Extract"));
   }
 }

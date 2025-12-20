@@ -8,19 +8,8 @@ class PLzmaNativeApis {
 
     external fun extract(archivePath: String, targetPath: String): Boolean
 
-    external fun getFfmpegVersion(): String
-
     companion object {
         init {
-            // Load FFmpeg libraries in correct order
-            System.loadLibrary("avutil")
-            System.loadLibrary("swresample")
-            System.loadLibrary("avcodec")
-            System.loadLibrary("avformat")
-            System.loadLibrary("swscale")
-            System.loadLibrary("avfilter")
-            
-            // Load plzmasdk library
             System.loadLibrary("plzmasdk")
         }
 

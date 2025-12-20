@@ -27,10 +27,6 @@ abstract class FlutterLzmaPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<String?> getFfmpegVersion() {
-    throw UnimplementedError('getFfmpegVersion() has not been implemented.');
-  }
-
   Future<String?> compress(List<String> files, String destFile) {
     throw UnimplementedError('compress() has not been implemented.');
   }

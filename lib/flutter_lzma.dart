@@ -5,10 +5,6 @@ class FlutterLzma {
     return FlutterLzmaPlatform.instance.getPlatformVersion();
   }
 
-  Future<String?> getFfmpegVersion() {
-    return FlutterLzmaPlatform.instance.getFfmpegVersion();
-  }
-
   Future<String?> compressFiles(List<String> sourcePaths, String destFile) {
     return FlutterLzmaPlatform.instance.compress(sourcePaths, destFile);
   }
